@@ -21,7 +21,7 @@ Building
 
 `libxcvt` is built using [Meson](https://mesonbuild.com/)
 
-	$ git clone https://gitlab.freedesktop.org/ofourdan/libxcvt.git
+	$ git clone https://gitlab.freedesktop.org/xorg/lib/libxcvt.git
 	$ cd libxcvt
 	$ meson build/ --prefix=...
 	$ ninja -C build/ install
