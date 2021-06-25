@@ -1,5 +1,8 @@
 man_conf = configuration_data()
-man_conf.set('version', meson.project_version())
+man_conf.set('appmansuffix', '1')
+man_conf.set('filemansuffix', '5')
+man_conf.set('vendorversion',
+	'"libxcvt @0@" "X Version 11"'.format(meson.project_version()))
 
 configure_file(
 	input: 'cvt.man',
