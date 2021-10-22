@@ -20,7 +20,7 @@ subdir('man')
 
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries : libxcvt,
-                 version : '1.0',
+                 version : meson.project_version(),
                  name : 'libxcvt',
                  description : 'A Library to generate VESA CVT standard timing modelines.')
 
