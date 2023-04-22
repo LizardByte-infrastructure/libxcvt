@@ -161,7 +161,7 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
 
         float hblank_percentage;
         int vsync_and_back_porch, vback_porch;
-        int hblank;
+        int hblank, hsync_w;
 
         /* 8. Estimated Horizontal period */
         hperiod = ((float) (1000000.0 / vfield_rate - CVT_MIN_VSYNC_BP)) /
@@ -216,10 +216,9 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         /* Fill in HSync values */
         mode_info->hsync_end = mode_info->hdisplay + hblank / 2;
 
-        mode_info->hsync_start = mode_info->hsync_end -
-            (mode_info->htotal * CVT_HSYNC_PERCENTAGE) / 100;
-        mode_info->hsync_start += CVT_H_GRANULARITY -
-            mode_info->hsync_start % CVT_H_GRANULARITY;
+        hsync_w = (mode_info->htotal * CVT_HSYNC_PERCENTAGE) / 100;
+        hsync_w -= hsync_w % CVT_H_GRANULARITY;
+        mode_info->hsync_start = mode_info->hsync_end - hsync_w;
 
         /* Fill in vsync values */
         mode_info->vsync_start = mode_info->vdisplay + CVT_MIN_V_PORCH;
