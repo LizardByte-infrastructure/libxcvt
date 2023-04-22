@@ -169,8 +169,8 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
 
         /* 9. Find number of lines in sync + backporch */
         if (((int) (CVT_MIN_VSYNC_BP / hperiod) + 1) <
-            (vsync + CVT_MIN_V_PORCH))
-            vsync_and_back_porch = vsync + CVT_MIN_V_PORCH;
+            (vsync + CVT_MIN_V_BPORCH))
+            vsync_and_back_porch = vsync + CVT_MIN_V_BPORCH;
         else
             vsync_and_back_porch = (int) (CVT_MIN_VSYNC_BP / hperiod) + 1;
 
