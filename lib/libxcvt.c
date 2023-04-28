@@ -79,8 +79,8 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
     /* 2) character cell horizontal granularity (pixels) - default 8 */
 #define CVT_H_GRANULARITY 8
 
-    /* 4) Minimum vertical porch (lines) - default 3 */
-#define CVT_MIN_V_PORCH 3
+    /* 4) Minimum vertical front porch (lines) - default 3 */
+#define CVT_MIN_V_PORCH_RND 3
 
     /* 4) Minimum number of vertical back porch lines - default 6 */
 #define CVT_MIN_V_BPORCH 6
@@ -165,7 +165,7 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
 
         /* 8. Estimated Horizontal period */
         hperiod = ((float) (1000000.0 / vfield_rate - CVT_MIN_VSYNC_BP)) /
-            (vdisplay_rnd + 2 * vmargin + CVT_MIN_V_PORCH + interlace);
+            (vdisplay_rnd + 2 * vmargin + CVT_MIN_V_PORCH_RND + interlace);
 
         /* 9. Find number of lines in sync + backporch */
         if (((int) (CVT_MIN_VSYNC_BP / hperiod) + 1) <
@@ -181,7 +181,7 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         /* 11. Find total number of lines in vertical field */
         mode_info->vtotal =
             vdisplay_rnd + 2 * vmargin + vsync_and_back_porch + interlace +
-            CVT_MIN_V_PORCH;
+            CVT_MIN_V_PORCH_RND;
 
         /* 5) Definition of Horizontal blanking time limitation */
         /* Gradient (%/kHz) - default 600 */
@@ -221,7 +221,7 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         mode_info->hsync_start = mode_info->hsync_end - hsync_w;
 
         /* Fill in vsync values */
-        mode_info->vsync_start = mode_info->vdisplay + CVT_MIN_V_PORCH;
+        mode_info->vsync_start = mode_info->vdisplay + CVT_MIN_V_PORCH_RND;
         mode_info->vsync_end = mode_info->vsync_start + vsync;
 
     }
