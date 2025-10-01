@@ -1,6 +1,6 @@
 project('libxcvt', 'c',
         version: '0.1.3',
-        meson_version: '>= 0.40.0',
+        meson_version: '>= 0.58.0',
         default_options: ['warning_level=1',
                           'buildtype=debugoptimized'])
 
