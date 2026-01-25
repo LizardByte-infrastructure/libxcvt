@@ -46,7 +46,7 @@ variables:
 
 # Re-generate the CI script and make sure it's the one currently checked in
 # If this job fails, re-generate the gitlab-ci.yml script, see
-# $SRCDIR/.gitlab-ci/generate-gitlab-ci.py
+# $SRCDIR/.gitlab-ci/ci.template
 #
 check-ci-script:
   extends:
@@ -73,21 +73,6 @@ check-commit:
   artifacts:
     reports:
       junit: results.xml
-
-#
-# Verify that merge request has the "allow collaboration" checkbox ticked
-#
-check-merge-request:
-  extends:
-    - .fdo.ci-fairy
-  stage: sanity check
-  script:
-    - ci-fairy check-merge-request --require-allow-collaboration --junit-xml=results.xml
-  artifacts:
-    when: on_failure
-    reports:
-      junit: results.xml
-  allow_failure: true
 
 
 .fedora.34:
