@@ -37,6 +37,10 @@ cvt_is_standard(int hdisplay, int vdisplay, float vrefresh, bool reduced, bool v
 {
     bool is_cvt = true;
 
+    /* Validate inputs to prevent division by zero in modulo operations */
+    if (vdisplay <= 0 || hdisplay <= 0)
+        return false;
+
     if ((!(vdisplay % 3) && ((vdisplay * 4 / 3) == hdisplay)) ||
         (!(vdisplay % 9) && ((vdisplay * 16 / 9) == hdisplay)) ||
         (!(vdisplay % 10) && ((vdisplay * 16 / 10) == hdisplay)) ||
