@@ -200,9 +200,13 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         (void) vback_porch;
 
         /* 11. Find total number of lines in vertical field */
-        mode_info->vtotal =
-            vdisplay_rnd + 2 * vmargin + vsync_and_back_porch + interlace +
-            CVT_MIN_V_PORCH_RND;
+        int vtotal_tmp = vdisplay_rnd + 2 * vmargin + vsync_and_back_porch +
+                         interlace + CVT_MIN_V_PORCH_RND;
+        if (vtotal_tmp < 0 || vtotal_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->vtotal = vtotal_tmp;
 
         /* 5) Definition of Horizontal blanking time limitation */
         /* Gradient (%/kHz) - default 600 */
@@ -238,18 +242,40 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         hblank -= hblank % (2 * CVT_H_GRANULARITY);
 
         /* 14. Find total number of pixels in a line. */
-        mode_info->htotal = mode_info->hdisplay + hblank;
+        int htotal_tmp = mode_info->hdisplay + hblank;
+        if (htotal_tmp < 0 || htotal_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->htotal = htotal_tmp;
 
         /* Fill in HSync values */
-        mode_info->hsync_end = mode_info->hdisplay + hblank / 2;
+        int hsync_end_tmp = mode_info->hdisplay + hblank / 2;
+        if (hsync_end_tmp < 0 || hsync_end_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->hsync_end = hsync_end_tmp;
 
         hsync_w = (mode_info->htotal * CVT_HSYNC_PERCENTAGE) / 100;
         hsync_w -= hsync_w % CVT_H_GRANULARITY;
-        mode_info->hsync_start = mode_info->hsync_end - hsync_w;
+        int hsync_start_tmp = mode_info->hsync_end - hsync_w;
+        if (hsync_start_tmp < 0 || hsync_start_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->hsync_start = hsync_start_tmp;
 
         /* Fill in vsync values */
-        mode_info->vsync_start = mode_info->vdisplay + CVT_MIN_V_PORCH_RND;
-        mode_info->vsync_end = mode_info->vsync_start + vsync;
+        int vsync_start_tmp = mode_info->vdisplay + CVT_MIN_V_PORCH_RND;
+        int vsync_end_tmp = vsync_start_tmp + vsync;
+        if (vsync_start_tmp < 0 || vsync_start_tmp > 65535 ||
+            vsync_end_tmp < 0 || vsync_end_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->vsync_start = vsync_start_tmp;
+        mode_info->vsync_end = vsync_end_tmp;
 
     }
     else {                      /* reduced blanking */
@@ -285,18 +311,42 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
             vblank_interval_lines = CVT_RB_VFPORCH + vsync + CVT_MIN_V_BPORCH;
 
         /* 11. Find total number of lines in vertical field */
-        mode_info->vtotal = vdisplay_rnd + 2 * vmargin + interlace + vblank_interval_lines;
+        int vtotal_tmp = vdisplay_rnd + 2 * vmargin + interlace + vblank_interval_lines;
+        if (vtotal_tmp < 0 || vtotal_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->vtotal = vtotal_tmp;
 
         /* 12. Find total number of pixels in a line */
-        mode_info->htotal = mode_info->hdisplay + CVT_RB_H_BLANK;
+        int htotal_tmp = mode_info->hdisplay + CVT_RB_H_BLANK;
+        if (htotal_tmp < 0 || htotal_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->htotal = htotal_tmp;
 
         /* Fill in HSync values */
-        mode_info->hsync_end = mode_info->hdisplay + CVT_RB_H_BLANK / 2;
-        mode_info->hsync_start = mode_info->hsync_end - CVT_RB_H_SYNC;
+        int hsync_end_tmp = mode_info->hdisplay + CVT_RB_H_BLANK / 2;
+        int hsync_start_tmp = hsync_end_tmp - CVT_RB_H_SYNC;
+        if (hsync_end_tmp < 0 || hsync_end_tmp > 65535 ||
+            hsync_start_tmp < 0 || hsync_start_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->hsync_end = hsync_end_tmp;
+        mode_info->hsync_start = hsync_start_tmp;
 
         /* Fill in vsync values */
-        mode_info->vsync_start = mode_info->vdisplay + CVT_RB_VFPORCH;
-        mode_info->vsync_end = mode_info->vsync_start + vsync;
+        int vsync_start_tmp = mode_info->vdisplay + CVT_RB_VFPORCH;
+        int vsync_end_tmp = vsync_start_tmp + vsync;
+        if (vsync_start_tmp < 0 || vsync_start_tmp > 65535 ||
+            vsync_end_tmp < 0 || vsync_end_tmp > 65535) {
+            free(mode_info);
+            return NULL;
+        }
+        mode_info->vsync_start = vsync_start_tmp;
+        mode_info->vsync_end = vsync_end_tmp;
     }
 
     /* Validate htotal and vtotal to prevent division by zero */
