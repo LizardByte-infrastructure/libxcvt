@@ -65,6 +65,11 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
     float interlace;            /* Please rename this */
     struct libxcvt_mode_info *mode_info;
 
+    /* Validate input parameters */
+    if (hdisplay <= 0 || vdisplay <= 0 || vrefresh < 0.0f) {
+        return NULL;
+    }
+
     mode_info = calloc(1, sizeof *mode_info);
     if (!mode_info)
         return NULL;
@@ -97,6 +102,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         vfield_rate = mode_info->vrefresh * 2;
     else
         vfield_rate = mode_info->vrefresh;
+
+    /* Validate vfield_rate to prevent division by zero */
+    if (vfield_rate <= 0.0f) {
+        free(mode_info);
+        return NULL;
+    }
 
     /* 2. Horizontal pixels */
     hdisplay_rnd = mode_info->hdisplay - (mode_info->hdisplay % CVT_H_GRANULARITY);
@@ -167,6 +178,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         hperiod = ((float) (1000000.0 / vfield_rate - CVT_MIN_VSYNC_BP)) /
             (vdisplay_rnd + 2 * vmargin + CVT_MIN_V_PORCH_RND + interlace);
 
+        /* Validate hperiod to prevent division by zero */
+        if (hperiod <= 0.0f) {
+            free(mode_info);
+            return NULL;
+        }
+
         /* 9. Find number of lines in sync + backporch */
         if (((int) (CVT_MIN_VSYNC_BP / hperiod) + 1) <
             (vsync + CVT_MIN_V_BPORCH))
@@ -207,6 +224,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         if (hblank_percentage < 20)
             hblank_percentage = 20;
 
+        /* Validate to prevent division by zero */
+        if (hblank_percentage >= 100.0f) {
+            free(mode_info);
+            return NULL;
+        }
+
         hblank = mode_info->hdisplay * hblank_percentage / (100.0 - hblank_percentage);
         hblank -= hblank % (2 * CVT_H_GRANULARITY);
 
@@ -244,6 +267,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         hperiod = ((float) (1000000.0 / vfield_rate - CVT_RB_MIN_VBLANK)) /
             (vdisplay_rnd + 2 * vmargin);
 
+        /* Validate hperiod to prevent division by zero */
+        if (hperiod <= 0.0f) {
+            free(mode_info);
+            return NULL;
+        }
+
         /* 9. Find number of lines in vertical blanking */
         vblank_interval_lines = ((float) CVT_RB_MIN_VBLANK) / hperiod + 1;
 
@@ -264,6 +293,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
         /* Fill in vsync values */
         mode_info->vsync_start = mode_info->vdisplay + CVT_RB_VFPORCH;
         mode_info->vsync_end = mode_info->vsync_start + vsync;
+    }
+
+    /* Validate htotal and vtotal to prevent division by zero */
+    if (mode_info->htotal == 0 || mode_info->vtotal == 0) {
+        free(mode_info);
+        return NULL;
     }
 
     /* 15/13. Find pixel clock frequency (kHz for xf86) */
