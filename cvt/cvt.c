@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <errno.h>
+#include <limits.h>
 
 #include <libxcvt/libxcvt.h>
 
@@ -169,6 +171,7 @@ main(int argc, char *argv[])
     bool reduced = false, verbose = false, is_cvt;
     bool interlaced = false;
     int n;
+    char *endptr;
 
     if ((argc < 3) || (argc > 7)) {
         print_usage(argv[0]);
@@ -191,25 +194,34 @@ main(int argc, char *argv[])
             return 0;
         }
         else if (!hdisplay) {
-            hdisplay = atoi(argv[n]);
-            if (!hdisplay) {
+            errno = 0;
+            long val = strtol(argv[n], &endptr, 10);
+            if (errno != 0 || endptr == argv[n] || *endptr != '\0' ||
+                val <= 0 || val > INT_MAX) {
                 print_usage(argv[0]);
                 return 1;
             }
+            hdisplay = (int)val;
         }
         else if (!vdisplay) {
-            vdisplay = atoi(argv[n]);
-            if (!vdisplay) {
+            errno = 0;
+            long val = strtol(argv[n], &endptr, 10);
+            if (errno != 0 || endptr == argv[n] || *endptr != '\0' ||
+                val <= 0 || val > INT_MAX) {
                 print_usage(argv[0]);
                 return 1;
             }
+            vdisplay = (int)val;
         }
         else if (!vrefresh) {
-            vrefresh = atof(argv[n]);
-            if (!vrefresh) {
+            errno = 0;
+            double val = strtod(argv[n], &endptr);
+            if (errno != 0 || endptr == argv[n] || *endptr != '\0' ||
+                val <= 0.0) {
                 print_usage(argv[0]);
                 return 1;
             }
+            vrefresh = (float)val;
         }
         else {
             print_usage(argv[0]);
