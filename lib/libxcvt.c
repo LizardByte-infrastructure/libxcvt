@@ -65,8 +65,12 @@ libxcvt_gen_mode_info(int hdisplay, int vdisplay, float vrefresh, bool reduced, 
     float interlace;            /* Please rename this */
     struct libxcvt_mode_info *mode_info;
 
-    /* Validate input parameters */
-    if (hdisplay <= 0 || vdisplay <= 0 || vrefresh < 0.0f) {
+    /* Validate input parameters to prevent overflow and division by zero
+     * Maximum values are chosen to prevent integer overflow in calculations.
+     * 1048576 (2^20) is a reasonable upper bound for display dimensions. */
+    if (hdisplay <= 0 || hdisplay > 1048576 ||
+        vdisplay <= 0 || vdisplay > 1048576 ||
+        vrefresh < 0.0f || vrefresh > 10000.0f) {
         return NULL;
     }
 
